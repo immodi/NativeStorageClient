@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Storage Client</string>
+    <string name="file_system">File System</string>
+</resources>
