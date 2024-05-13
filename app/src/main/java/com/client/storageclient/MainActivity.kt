@@ -14,7 +14,6 @@ import com.client.storageclient.composables.FileCard
 import com.client.storageclient.composables.FilesList
 import com.client.storageclient.filesystem.File
 import com.client.storageclient.filesystem.Folder
-import com.client.storageclient.filesystem.api.SearchByName
 import com.client.storageclient.navigation.Navigation
 import com.client.storageclient.ui.theme.StorageClientTheme
 
@@ -29,8 +28,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-//                    Navigation(navController = navController)
-                    SearchByName()
+                    Navigation(navController = navController)
                 }
             }
         }

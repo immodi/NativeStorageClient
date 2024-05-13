@@ -5,13 +5,13 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
 
-interface AgeApi {
+interface FileSystemApi {
     @Headers(
         "Accept: application/json"
     )
 
     @GET("/")
-    abstract fun getAgeByName(
-        @Query("name") name: String
-    ): Call<AgeModel?>?
+    fun getFileSystemData(
+//        @Query("name") name: String
+    ): Call<FileSystemResponse?>?
 }

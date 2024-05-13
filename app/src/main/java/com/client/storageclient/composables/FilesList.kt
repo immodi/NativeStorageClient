@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -28,12 +31,13 @@ import com.client.storageclient.R
 import com.client.storageclient.fileClick
 import com.client.storageclient.filesystem.File
 import com.client.storageclient.filesystem.FileSystemObject
+import com.client.storageclient.filesystem.api.sendRequest
 import com.client.storageclient.navigation.Navigation
 import com.client.storageclient.navigation.Routes
 
 @Composable
 fun FilesList(
-    fileNames: Array<out FileSystemObject>,
+//    fileNames: Array<out FileSystemObject>,
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
@@ -45,6 +49,18 @@ fun FilesList(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
     ) {
+        val fileSystemState = remember {
+            mutableStateOf(listOf<FileSystemObject>())
+        }
+
+        val progressState = remember {
+            mutableStateOf(false)
+        }
+
+        LaunchedEffect(Unit) {
+            sendRequest(fileSystemState, progressState)
+        }
+
         Text(
             modifier = Modifier
                 .padding(
@@ -56,7 +72,7 @@ fun FilesList(
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
-        fileNames.forEach {
+        fileSystemState.value.forEach {
             Surface(
                 onClick = { if (it is File) {
                         navController.navigate(Routes.FileCard.route + "/${it.name}/${it.getSizeString()}/${it.id}")

@@ -2,6 +2,9 @@ package com.client.storageclient.filesystem.api
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import com.client.storageclient.filesystem.File
+import com.client.storageclient.filesystem.FileSystemObject
+import com.client.storageclient.filesystem.Folder
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -9,33 +12,52 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 fun sendRequest(
-    rStateName: MutableState<String>,
-    rStateAge: MutableState<Int>,
+    rStateFileSystem: MutableState<List<FileSystemObject>>,
     rStateProgress: MutableState<Boolean>
 ) {
     rStateProgress.value = true
 
     val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.agify.io")
+//        .baseUrl("http://192.168.1.13:8000")
+        .baseUrl("https://freetelebot.pythonanywhere.com/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val api = retrofit.create(AgeApi::class.java)
-
-    val call: Call<AgeModel?>? = api.getAgeByName(rStateName.value)
+    val api = retrofit.create(FileSystemApi::class.java)
+    val call: Call<FileSystemResponse?>? = api.getFileSystemData()
 
     call!!.enqueue(
-        object : Callback<AgeModel?> {
-            override fun onResponse(call: Call<AgeModel?>, response: Response<AgeModel?>) {
+        object : Callback<FileSystemResponse?> {
+            override fun onResponse(call: Call<FileSystemResponse?>, response: Response<FileSystemResponse?>) {
                 if (response.isSuccessful) {
                     Log.d("TAG", "" + response.body())
                     rStateProgress.value = false
-                    rStateAge.value = response.body()!!.age
+                    val newFiles = response.body()!!.filesArray
+                    val acceptedFilesArray =  mutableListOf<File>()
+                    for (file in newFiles) {
+                        acceptedFilesArray.add(File(file.fileId, file.fileName, file.fileSize))
+                    }
+
+                    val newDirs = response.body()!!.dirsArray
+                    val acceptedFoldersArray =  mutableListOf<Folder>()
+                    for (folder in newDirs) {
+                        acceptedFoldersArray.add(Folder(folder.dirId, folder.dirPath))
+                    }
+
+                    val finalFileSystem = mutableListOf<FileSystemObject>()
+                    acceptedFilesArray.forEach {
+                        finalFileSystem.add(it)
+                    }
+                    acceptedFoldersArray.forEach {
+                        finalFileSystem.add(it)
+                    }
+
+                    rStateFileSystem.value = finalFileSystem
                 }
             }
 
-            override fun onFailure(call: Call<AgeModel?>, response: Throwable) {
-                Log.d("TAG", "Failure")
+            override fun onFailure(call: Call<FileSystemResponse?>, response: Throwable) {
+                Log.d("TAG", response.message!!.toString())
                 rStateProgress.value = false
             }
         }

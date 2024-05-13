@@ -16,12 +16,12 @@ import com.client.storageclient.filesystem.Folder
 fun Navigation(navController: NavHostController){
     NavHost(navController = navController, startDestination = Routes.FileSystem.route) {
         composable(Routes.FileSystem.route) {
-            val file1 = File(id = 0, name = "havana.mp4", sizeInBytes = 123456789L)
-            val file3 = File(id = 0, name = "WHAT??!.gif", sizeInBytes = 1024/2L)
-            val file2 = Folder(id = 1, name = "test")
-            val testArr = arrayOf(file1, file2, file3)
-            val sortedArray = testArr.sortedArrayWith(compareBy { it is Folder })
-            FilesList(fileNames = sortedArray, navController = navController)
+//            val file1 = File(id = 0, name = "havana.mp4", sizeInBytes = 123456789L)
+//            val file3 = File(id = 0, name = "WHAT??!.gif", sizeInBytes = 1024/2L)
+//            val file2 = Folder(id = 1, name = "test")
+//            val testArr = arrayOf(file1, file2, file3)
+//            val sortedArray = testArr.sortedArrayWith(compareBy { it is Folder })
+            FilesList(navController = navController)
         }
         composable(
             route = Routes.FileCard.route + "/{fileName}/{fileSize}/{fileId}",
