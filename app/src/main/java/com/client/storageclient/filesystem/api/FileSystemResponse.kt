@@ -1,6 +1,6 @@
 package com.client.storageclient.filesystem.api
 
-data class AgeModel(
+data class FileSystemModel(
     var count: Int,
     var name: String,
     var age: Int
