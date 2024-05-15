@@ -13,7 +13,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 fun sendRequest(
     rStateFileSystem: MutableState<List<FileSystemObject>>,
-    rStateProgress: MutableState<Boolean>
+    rStateProgress: MutableState<Boolean>,
+    mainDirId: Int
 ) {
     rStateProgress.value = true
 
@@ -24,7 +25,7 @@ fun sendRequest(
         .build()
 
     val api = retrofit.create(FileSystemApi::class.java)
-    val call: Call<FileSystemResponse?>? = api.getFileSystemData()
+    val call: Call<FileSystemResponse?>? = api.getFileSystemData(mainDirId)
 
     call!!.enqueue(
         object : Callback<FileSystemResponse?> {
@@ -32,6 +33,7 @@ fun sendRequest(
                 if (response.isSuccessful) {
                     Log.d("TAG", "" + response.body())
                     rStateProgress.value = false
+//                    val finalFileSystem: MutableList<FileSystemObject> = api.getFileSystemData(response)
                     val newFiles = response.body()!!.filesArray
                     val acceptedFilesArray =  mutableListOf<File>()
                     for (file in newFiles) {

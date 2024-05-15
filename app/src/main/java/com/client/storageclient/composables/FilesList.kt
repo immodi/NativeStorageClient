@@ -31,15 +31,16 @@ import com.client.storageclient.R
 import com.client.storageclient.fileClick
 import com.client.storageclient.filesystem.File
 import com.client.storageclient.filesystem.FileSystemObject
+import com.client.storageclient.filesystem.Folder
 import com.client.storageclient.filesystem.api.sendRequest
 import com.client.storageclient.navigation.Navigation
 import com.client.storageclient.navigation.Routes
 
 @Composable
 fun FilesList(
-//    fileNames: Array<out FileSystemObject>,
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    dirId: Int
 ) {
     Column(
         modifier = modifier
@@ -58,7 +59,7 @@ fun FilesList(
         }
 
         LaunchedEffect(Unit) {
-            sendRequest(fileSystemState, progressState)
+            sendRequest(fileSystemState, progressState, dirId)
         }
 
         Text(
@@ -74,8 +75,11 @@ fun FilesList(
         )
         fileSystemState.value.forEach {
             Surface(
-                onClick = { if (it is File) {
+                onClick = {
+                    if (it is File) {
                         navController.navigate(Routes.FileCard.route + "/${it.name}/${it.getSizeString()}/${it.id}")
+                    } else if (it is Folder) {
+                        navController.navigate(Routes.FileSystem.route + "/${it.id}")
                     }
                 },
                 modifier = Modifier

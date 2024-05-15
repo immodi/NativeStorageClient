@@ -30,7 +30,7 @@ import com.client.storageclient.filesystem.Folder
 import com.client.storageclient.ui.theme.StorageClientTheme
 
 @Composable
-fun FileCard(fileName: String, fileSize: String) {
+fun FileCard(fileId: Int, fileName: String, fileSize: String) {
     Column (
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
@@ -70,7 +70,7 @@ fun FileCard(fileName: String, fileSize: String) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ButtonComposable{ Log.d("tag", "testing") }
+            ButtonComposable{ Log.d("tag", fileId.toString()) }
         }
     }
 }
@@ -98,6 +98,6 @@ fun ButtonComposable(onClick: () -> Unit) {
 fun FileCardPreview() {
     StorageClientTheme {
         val file1 = File(id = 0, name = "havana.mp4", sizeInBytes = 123456789L)
-        FileCard(fileName = file1.name, fileSize = file1.getSizeString() )
+        FileCard(fileId = 1, fileName = file1.name, fileSize = file1.getSizeString() )
     }
 }

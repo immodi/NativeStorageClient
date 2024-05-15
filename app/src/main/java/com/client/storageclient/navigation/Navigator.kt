@@ -1,5 +1,6 @@
 package com.client.storageclient.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -14,14 +15,16 @@ import com.client.storageclient.filesystem.Folder
 
 @Composable
 fun Navigation(navController: NavHostController){
-    NavHost(navController = navController, startDestination = Routes.FileSystem.route) {
-        composable(Routes.FileSystem.route) {
-//            val file1 = File(id = 0, name = "havana.mp4", sizeInBytes = 123456789L)
-//            val file3 = File(id = 0, name = "WHAT??!.gif", sizeInBytes = 1024/2L)
-//            val file2 = Folder(id = 1, name = "test")
-//            val testArr = arrayOf(file1, file2, file3)
-//            val sortedArray = testArr.sortedArrayWith(compareBy { it is Folder })
-            FilesList(navController = navController)
+    NavHost(navController = navController, startDestination = Routes.FileSystem.route + "/1") {
+        composable(
+            route = Routes.FileSystem.route + "/{dirId}",
+            arguments = listOf(
+                navArgument("dirId") {type = NavType.IntType; defaultValue = 1}
+            )
+        ) {backStackEntry ->
+            val dirId: Int = backStackEntry.arguments?.getInt("dirId") ?: 1
+            Log.d("Test", dirId.toString())
+            FilesList(navController = navController, dirId = dirId)
         }
         composable(
             route = Routes.FileCard.route + "/{fileName}/{fileSize}/{fileId}",
@@ -34,7 +37,7 @@ fun Navigation(navController: NavHostController){
             val fileId: Int = backStackEntry.arguments?.getInt("fileId") ?: 0
             val fileName: String = backStackEntry.arguments?.getString("fileName") ?: ""
             val fileSize: String = backStackEntry.arguments?.getString("fileSize") ?: ""
-            FileCard(fileName = fileName, fileSize = fileSize)
+            FileCard(fileId = fileId, fileName = fileName, fileSize = fileSize)
         }
     }
 }
