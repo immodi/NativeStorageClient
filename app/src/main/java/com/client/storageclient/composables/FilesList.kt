@@ -26,14 +26,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.Navigation
 import com.client.storageclient.R
-import com.client.storageclient.fileClick
 import com.client.storageclient.filesystem.File
 import com.client.storageclient.filesystem.FileSystemObject
 import com.client.storageclient.filesystem.Folder
-import com.client.storageclient.filesystem.api.sendRequest
-import com.client.storageclient.navigation.Navigation
+import com.client.storageclient.filesystem.api.refreshFileSystem
 import com.client.storageclient.navigation.Routes
 
 @Composable
@@ -59,7 +56,7 @@ fun FilesList(
         }
 
         LaunchedEffect(Unit) {
-            sendRequest(fileSystemState, progressState, dirId)
+            refreshFileSystem(fileSystemState, progressState, dirId)
         }
 
         Text(

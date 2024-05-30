@@ -15,3 +15,20 @@ data class FilesArray(
     val fileName: String,
     val fileSize: Long
 )
+
+data class FileData(
+    val chunksIds: List<ChunksId>,
+    val fileFullPath: String,
+    val fileId: Int,
+    val fileMimeType: String,
+    val fileName: String
+)
+
+data class ChunksId(
+    val chunkId: Int,
+    val chunkName: String
+)
+
+data class ChunkUrl(
+    val url: String
+)

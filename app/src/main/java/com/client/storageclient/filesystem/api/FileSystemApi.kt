@@ -1,5 +1,6 @@
 package com.client.storageclient.filesystem.api
 
+import android.util.Log
 import com.client.storageclient.fileClick
 import com.client.storageclient.filesystem.File
 import com.client.storageclient.filesystem.FileSystemObject
@@ -20,27 +21,14 @@ interface FileSystemApi {
         @Query("dirId") dirId: Int
     ): Call<FileSystemResponse?>?
 
-    fun getFileSystemData(response: Response<FileSystemResponse?>): MutableList<FileSystemObject> {
-        val newFiles = response.body()!!.filesArray
-        val acceptedFilesArray =  mutableListOf<File>()
-        for (file in newFiles) {
-            acceptedFilesArray.add(File(file.fileId, file.fileName, file.fileSize))
-        }
+    @GET("/file")
+    fun getFileData(
+        @Query("fileId") fileId: Int
+    ): Call<FileData?>?
 
-        val newDirs = response.body()!!.dirsArray
-        val acceptedFoldersArray =  mutableListOf<Folder>()
-        for (folder in newDirs) {
-            acceptedFoldersArray.add(Folder(folder.dirId, folder.dirPath))
-        }
-
-        val finalFileSystem = mutableListOf<FileSystemObject>()
-        acceptedFilesArray.forEach {
-            finalFileSystem.add(it)
-        }
-        acceptedFoldersArray.forEach {
-            finalFileSystem.add(it)
-        }
-
-        return finalFileSystem
-    }
+    @GET("/download")
+    fun getChunkUrl(
+        @Query("chunkId") chunkId: Int,
+        @Query("isLink") isLink: Boolean
+    ): Call<ChunkUrl?>?
 }
