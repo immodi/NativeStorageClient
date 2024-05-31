@@ -35,7 +35,7 @@ class DownloadBroadcastReceiver(
                     val regex = Regex("""\d+""")
                     val sortedUris = chunkLocalUris.value.sortedBy { filepath ->
                         // Extract the part after "Download/"
-                        val filename = filepath.toString().substringAfter("Download/")
+                        val filename = filepath.toString().substringAfter(".")
                         // Find the numeric part in the filename
                         regex.find(filename)?.value?.toInt() ?: 0
                     }
