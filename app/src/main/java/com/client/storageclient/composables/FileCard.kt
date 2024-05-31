@@ -19,14 +19,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -46,6 +50,7 @@ import com.client.storageclient.filesystem.api.FileData
 import com.client.storageclient.filesystem.api.downloadChunk
 import com.client.storageclient.filesystem.api.getFileData
 import com.client.storageclient.ui.theme.StorageClientTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun FileCard(
@@ -54,11 +59,13 @@ fun FileCard(
     fileSize: String,
     chunkLocalUris: MutableState<MutableList<Uri>>,
     totalChunksNumber: MutableState<Int>,
-    isEnabled: MutableState<Boolean>
+    currentProgress: MutableFloatState,
+    isLoading: MutableState<Boolean>
 ) {
     val context = LocalContext.current
 
     LaunchedEffect(key1 = 1) {
+        currentProgress.floatValue = 0f
         println("NEwState:" + chunkLocalUris.value)
     }
     Column (
@@ -109,7 +116,8 @@ fun FileCard(
                         totalChunksNumber
                     )
                 },
-                isEnabled
+                currentProgress,
+                isLoading
             )
         }
     }
@@ -117,23 +125,38 @@ fun FileCard(
 
 
 @Composable
-fun DownloadButtonComposable(onClick: () -> Unit, isEnabled: MutableState<Boolean>) {
-    Button (
-        modifier = Modifier
-            .width(300.dp)
-            .height(50.dp),
-        shape = MaterialTheme.shapes.medium,
-        onClick = { onClick() },
-        enabled = isEnabled.value
-    ) {
-        Text(
-            modifier = Modifier,
-            text = "Download",
-            fontSize = 18.sp,
-            color = Color.White
+fun DownloadButtonComposable(onClick: () -> Unit, currentProgress: MutableFloatState, isLoading: MutableState<Boolean>) {
+    val isEnabled = remember { mutableStateOf(true) }
+    if(!isLoading.value) {
+        Button(
+            modifier = Modifier
+                .width(300.dp)
+                .height(50.dp),
+            shape = MaterialTheme.shapes.medium,
+            onClick = {
+                onClick();
+                isEnabled.value = false
+                isLoading.value = true
+            },
+            enabled = isEnabled.value
+        ) {
+            Text(
+                modifier = Modifier,
+                text = "Download",
+                fontSize = 18.sp,
+                color = Color.White
+            )
+        }
+    } else {
+        LinearProgressIndicator(
+            progress = currentProgress.floatValue,
+            modifier = Modifier
+                .width(350.dp)
+                .padding(vertical = 20.dp),
         )
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

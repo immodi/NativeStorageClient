@@ -11,6 +11,7 @@ import com.client.storageclient.filesystem.File
 import com.client.storageclient.filesystem.FileSystemObject
 import com.client.storageclient.filesystem.Folder
 import com.client.storageclient.filesystem.api.downloader.AndroidDownloader
+import com.client.storageclient.filesystem.api.downloader.numberAwareAlphabeticalSort
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -92,11 +93,21 @@ fun getFileData(
                 if (response.isSuccessful) {
                     val fileData = response.body()!!
                     totalChunksNumber.value = fileData.chunksIds.count()
+
+//                    val testList = mutableListOf<Uri>()
                     for (chunkId in fileData.chunksIds) {
                         chunkLocalUris.value.add("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${chunkId.chunkName}".toUri())
                         downloadChunk(context, chunkId.chunkId, chunkId.chunkName)
+//                        testList.add(chunkId.chunkName.toUri())
                     }
-                    Log.d("TAG", response.body().toString())
+//                    val regex = Regex("""\d+""")
+//                    val sortedUris = testList.sortedBy { filepath ->
+//                        // Extract the part after "Download/"
+//                        val filename = filepath.toString()
+//                        // Find the numeric part in the filename
+//                        regex.find(filename)?.value?.toInt() ?: 0
+//                    }
+//                    println("Sorted List: " + sortedUris)
                 }
             }
 

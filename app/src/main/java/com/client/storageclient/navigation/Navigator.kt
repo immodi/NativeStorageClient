@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -26,7 +27,8 @@ fun Navigation(
     fileNameState: MutableState<String>,
     chunkLocalUris: MutableState<MutableList<Uri>>,
     totalChunksNumber : MutableState<Int>,
-    isEnabled: MutableState<Boolean>
+    currentProgress: MutableFloatState,
+    isLoading: MutableState<Boolean>
 ){
     NavHost(navController = navController, startDestination = Routes.FileSystem.route + "/1") {
         composable(
@@ -51,7 +53,7 @@ fun Navigation(
             val fileName: String = backStackEntry.arguments?.getString("fileName") ?: ""
             fileNameState.value = fileName
             val fileSize: String = backStackEntry.arguments?.getString("fileSize") ?: ""
-            FileCard(fileId = fileId, fileName = fileName, fileSize = fileSize, chunkLocalUris = chunkLocalUris, totalChunksNumber = totalChunksNumber, isEnabled = isEnabled)
+            FileCard(fileId = fileId, fileName = fileName, fileSize = fileSize, chunkLocalUris = chunkLocalUris, totalChunksNumber = totalChunksNumber, currentProgress = currentProgress, isLoading)
         }
     }
 }

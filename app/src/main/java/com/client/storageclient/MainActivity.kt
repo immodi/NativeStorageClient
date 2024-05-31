@@ -18,6 +18,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,9 +53,10 @@ class MainActivity : ComponentActivity() {
             val fileName = remember {
                 mutableStateOf("")
             }
-            val isEnabled = remember { mutableStateOf(true) }
+            val currentProgress = remember { mutableFloatStateOf(0f) }
+            val isLoading = remember { mutableStateOf(false) }
 
-            val broadcastReceiver = DownloadBroadcastReceiver(fileName, chunkLocalUris, totalChunksNumber, isEnabled)
+            val broadcastReceiver = DownloadBroadcastReceiver(fileName, chunkLocalUris, totalChunksNumber, currentProgress, isLoading)
             downloadBroadcastReceiver = broadcastReceiver
 
             registerReceiver(
@@ -73,7 +76,8 @@ class MainActivity : ComponentActivity() {
                         fileNameState = fileName,
                         chunkLocalUris = chunkLocalUris,
                         totalChunksNumber = totalChunksNumber,
-                        isEnabled = isEnabled
+                        currentProgress = currentProgress,
+                        isLoading = isLoading
                     )
                 }
 

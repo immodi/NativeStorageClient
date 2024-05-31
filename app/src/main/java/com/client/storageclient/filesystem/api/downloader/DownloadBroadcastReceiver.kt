@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -16,7 +17,8 @@ class DownloadBroadcastReceiver(
         private val fileName: MutableState<String>,
         private val chunkLocalUris: MutableState<MutableList<Uri>>,
         private val totalChunksNumber: MutableState<Int>,
-        private val isEnabled: MutableState<Boolean>
+        private val currentProgress: MutableFloatState,
+        private val isLoading: MutableState<Boolean>
     ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 //        val downloadManager: DownloadManager = context.getSystemService(DownloadManager::class.java)
@@ -29,16 +31,28 @@ class DownloadBroadcastReceiver(
                 try {
                     val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                     val file = File(path, fileName.value)
-                    for (chunkUri in chunkLocalUris.value.sortedWith(::numberAwareAlphabeticalSort)) {
+
+                    val regex = Regex("""\d+""")
+                    val sortedUris = chunkLocalUris.value.sortedBy { filepath ->
+                        // Extract the part after "Download/"
+                        val filename = filepath.toString().substringAfter("Download/")
+                        // Find the numeric part in the filename
+                        regex.find(filename)?.value?.toInt() ?: 0
+                    }
+
+                    for ((index, chunkUri) in sortedUris.withIndex()) {
                         println("Custom: " + chunkUri.path)
                         val bytes = File(chunkUri.path!!).readBytes()
                         file.appendBytes(bytes)
+                        currentProgress.floatValue = (index.toFloat() / sortedUris.size)
+                        println("CurrentMergeProgress: " + (index+1.toFloat() / sortedUris.size))
                     }
                     for (chunkUri in chunkLocalUris.value) {
                         File(chunkUri.path!!).delete()
                     }
-                    isEnabled.value = false
 
+                    isLoading.value = false
+                    println("Done Merging")
 
                 } catch (e: Exception) {
                     println("CustomError: " + e.toString())
