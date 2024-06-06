@@ -1,6 +1,8 @@
 package com.client.storageclient.filesystem.api.downloader
 
 import android.app.DownloadManager
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,10 +10,9 @@ import android.net.Uri
 import android.os.Environment
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.core.app.NotificationCompat
+import com.client.storageclient.R
 import java.io.File
-import java.io.FileInputStream
 
 class DownloadBroadcastReceiver(
         private val fileName: MutableState<String>,
@@ -22,47 +23,79 @@ class DownloadBroadcastReceiver(
     ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 //        val downloadManager: DownloadManager = context.getSystemService(DownloadManager::class.java)
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         if (intent.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
             val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             if (id != -1L) {
                 totalChunksNumber.value -= 1
+                currentProgress.floatValue = 1 - (totalChunksNumber.value.toFloat() / chunkLocalUris.value.size)
+                println(
+                    "totalChunksNumber.value == " + totalChunksNumber.value
+                )
             }
             if (totalChunksNumber.value <= 0) {
-                try {
-                    val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    val file = File(path, fileName.value)
-
-                    val regex = Regex("""\d+""")
-                    val sortedUris = chunkLocalUris.value.sortedBy { filepath ->
-                        // Extract the part after "Download/"
-                        val filename = filepath.toString().substringAfter(".")
-                        // Find the numeric part in the filename
-                        regex.find(filename)?.value?.toInt() ?: 0
-                    }
-
-                    for ((index, chunkUri) in sortedUris.withIndex()) {
-                        println("Custom: " + chunkUri.path)
-                        val bytes = File(chunkUri.path!!).readBytes()
-                        file.appendBytes(bytes)
-                        currentProgress.floatValue = (index.toFloat() / sortedUris.size)
-                        println("CurrentMergeProgress: " + (index+1.toFloat() / sortedUris.size))
-                    }
-                    for (chunkUri in chunkLocalUris.value) {
-                        File(chunkUri.path!!).delete()
-                    }
-
-                    isLoading.value = false
-                    println("Done Merging")
-
-                } catch (e: Exception) {
-                    println("CustomError: " + e.toString())
-                }
+                mergeFile(
+                    context,
+                    fileName,
+                    chunkLocalUris,
+                    isLoading,
+                    notificationManager
+                )
             }
-
         }
     }
 }
 
+
+fun mergeFile(
+    context: Context,
+    fileName: MutableState<String>,
+    chunkLocalUris: MutableState<MutableList<Uri>>,
+    isLoading: MutableState<Boolean>,
+    notificationManager: NotificationManager
+    ) {
+    try {
+        val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val file = File(path, fileName.value)
+
+        val regex = Regex("""\d+""")
+        val sortedUris = chunkLocalUris.value.sortedBy { filepath ->
+            // Extract the part after "Download/"
+            val filename = filepath.toString().substringAfter(".")
+            // Find the numeric part in the filename
+            regex.find(filename)?.value?.toInt() ?: 0
+        }
+
+        for ((index, chunkUri) in sortedUris.withIndex()) {
+            println("Custom: " + chunkUri.path)
+            val bytes = File(chunkUri.path!!).readBytes()
+            file.appendBytes(bytes)
+            println("CurrentMergeProgress: " + (index+1.toFloat() / sortedUris.size))
+        }
+        for (chunkUri in chunkLocalUris.value) {
+            File(chunkUri.path!!).delete()
+        }
+
+        isLoading.value = false
+        println("Done Merging")
+
+        notificationManager.notify(1, getNotification(context, fileName.value))
+
+    } catch (e: Exception) {
+        println("CustomError: " + e.toString())
+    }
+
+}
+
+fun getNotification(context: Context, fileName: String): Notification {
+    return NotificationCompat.Builder(context, "notification_channel")
+        .setSmallIcon(R.drawable.ic_launcher_foreground)
+        .setContentTitle("Download Complete!")
+        .setContentText("'$fileName' has been successfully downloaded!")
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .build()
+}
 
 // Our helper function which looks for numbers at the end of a string:
 fun extractIntegerFromEndOfString(input: Uri): Int? {

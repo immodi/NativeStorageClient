@@ -92,7 +92,7 @@ fun getFileData(
             override fun onResponse(call: Call<FileData?>, response: Response<FileData?>) {
                 if (response.isSuccessful) {
                     val fileData = response.body()!!
-                    totalChunksNumber.value = fileData.chunksIds.count()
+                    totalChunksNumber.value = fileData.chunksIds.size
 
 //                    val testList = mutableListOf<Uri>()
                     for (chunkId in fileData.chunksIds) {
