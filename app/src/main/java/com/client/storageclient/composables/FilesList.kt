@@ -107,7 +107,7 @@ fun FilesList(
                                 end = 10.dp
                             )
                             .wrapContentHeight(Alignment.CenterVertically),
-                        text = it.getIcon() + it.name,
+                        text = it.getIcon() + getFileOrFolderName(it.name, it is File),
                         textAlign = TextAlign.Start,
                     )
                     if (it is File) {
@@ -120,5 +120,18 @@ fun FilesList(
                 }
             }
         }
+    }
+}
+
+
+fun getFileOrFolderName(name: String, isFile: Boolean): String {
+    return if (isFile) {
+        if (name.length > 20) {
+            name.substring(0, 21) + "..."
+        } else {
+            name
+        }
+    } else {
+        name.substringAfterLast("/")
     }
 }
